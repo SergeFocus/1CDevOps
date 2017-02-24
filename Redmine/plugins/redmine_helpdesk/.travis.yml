@@ -1,0 +1,65 @@
+language: ruby
+rvm:
+- 2.0
+- 2.1
+- 2.2
+- jruby
+env:
+  global:
+  - REDMINE_LANG=en
+  - MYSQL_DATABASE=redmine
+  - MYSQL_HOST=127.0.0.1
+  - MYSQL_PORT=3306
+  - MYSQL_USER=root
+  - MYSQL_PASSWORD=
+  - POSTGRES_DATABASE=redmine
+  - POSTGRES_USER=postgres
+  matrix:
+  - REDMINE_VERSION=3.1.3 DATABASE_ADAPTER=mysql
+  - REDMINE_VERSION=3.1.3 DATABASE_ADAPTER=postgresql
+  - REDMINE_VERSION=3.0.7 DATABASE_ADAPTER=mysql
+  - REDMINE_VERSION=3.0.7 DATABASE_ADAPTER=postgresql
+  - REDMINE_VERSION=2.6.5 DATABASE_ADAPTER=mysql
+  - REDMINE_VERSION=2.6.9 DATABASE_ADAPTER=postgresql
+  - REDMINE_VERSION=2.5.3 DATABASE_ADAPTER=mysql
+  - REDMINE_VERSION=2.5.3 DATABASE_ADAPTER=postgresql
+  - REDMINE_VERSION=2.4.7 DATABASE_ADAPTER=mysql
+  - REDMINE_VERSION=2.4.7 DATABASE_ADAPTER=postgresql
+matrix:
+  allow_failures: # Incomplete ActiveRecord 4.2 support in jruby
+  - rvm: jruby
+    env: REDMINE_VERSION=3.1.3 DATABASE_ADAPTER=mysql
+  - rvm: jruby
+    env: REDMINE_VERSION=3.1.3 DATABASE_ADAPTER=postgresql
+  - rvm: jruby
+    env: REDMINE_VERSION=3.0.7 DATABASE_ADAPTER=mysql
+  - rvm: jruby
+    env: REDMINE_VERSION=3.0.7 DATABASE_ADAPTER=postgresql
+  - rvm: 2.2
+    env: REDMINE_VERSION=2.6.5 DATABASE_ADAPTER=mysql
+  - rvm: 2.2
+    env: REDMINE_VERSION=2.6.5 DATABASE_ADAPTER=postgresql
+  - rvm: 2.2
+    env: REDMINE_VERSION=2.5.3 DATABASE_ADAPTER=mysql
+  - rvm: 2.2
+    env: REDMINE_VERSION=2.5.3 DATABASE_ADAPTER=postgresql
+  - rvm: 2.2
+    env: REDMINE_VERSION=2.4.7 DATABASE_ADAPTER=mysql
+  - rvm: 2.2
+    env: REDMINE_VERSION=2.4.7 DATABASE_ADAPTER=postgresql
+addons:
+  code_climate:
+    repo_token:
+      secure: "SAyz/KNRQQC1T2oGNUxbDceBcoaL/IxvEmeKEIR3iivj3RMJi2Nm8v5B2Su9MhQBegi2mH70ypgkTPmGh69tSONf1sqkkCAxsZnIqihl1Ai+dwM2KlBLGw/k+IG9/xD1+hgQiO06OKZMPO+Kj9X28mMqJ75YVKGE4alr1mfo2NM="
+before_install:
+  - rake helpdesk:redmine:install
+  - cd test/app
+  - export BUNDLE_GEMFILE=Gemfile
+before_script:
+  - export RAILS_ENV=test
+  - mysql -e 'create database redmine;'
+  - psql -c 'create database redmine;' -U postgres
+  - export RAILS_ENV=test
+  - bundle exec rake db:migrate
+script:
+  - bundle exec rake helpdesk:ci

@@ -1,0 +1,32 @@
+language: ruby
+
+rvm:
+  - 1.8.7
+  - 1.9.3
+  - 2.0
+  - 2.1
+  - jruby
+
+matrix:
+  allow_failures:
+    - rvm: jruby
+
+env:
+  - REDMINE_VERSION=2.5.2 VERBOSE=yes
+  - REDMINE_VERSION=2.4.6 VERBOSE=yes
+
+before_install:
+  - git submodule add https://github.com/RCRM/redmine_plugins_travis-ci travis
+  - cp ./travis/.travis-database.yml ./.travis-database.yml
+
+script:
+  - export PLUGIN=redmine_checklists
+  - export WORKSPACE=$(pwd)/workspace
+  - export PATH_TO_PLUGIN=$(pwd)
+  - export PATH_TO_REDMINE=$WORKSPACE/redmine
+  - mkdir $WORKSPACE
+  - bash -x ./travis/.travis-init.sh -r || exit 1
+  - bash -x ./travis/.travis-init.sh -i || exit 1
+  - bash -x ./travis/.travis-init.sh -t || exit 1
+  - bash -x ./travis/.travis-init.sh -u || exit 1
+  
